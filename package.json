@@ -31,6 +31,14 @@
   ],
   "author": "凌滅風",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ckmben-creator/dsh-whale-song.git"
+  },
+  "homepage": "https://github.com/ckmben-creator/dsh-whale-song#readme",
+  "bugs": {
+    "url": "https://github.com/ckmben-creator/dsh-whale-song/issues"
+  },
   "engines": {
     "node": ">=20"
   },
