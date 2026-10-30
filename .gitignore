@@ -1,0 +1,15 @@
+# 渲染产物：不要进仓库
+out/
+*.wav
+
+# 只在本地留存、不进仓库的素材（授权不明 / 不可商用 / 测试用）
+archive/
+
+# Python
+__pycache__/
+*.pyc
+
+# 编辑器 / 系统
+.DS_Store
+Thumbs.db
+node_modules/

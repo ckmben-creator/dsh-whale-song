@@ -1,0 +1,47 @@
+{
+  "name": "dsh-whale-song",
+  "version": "0.1.0",
+  "description": "Whale-song instrument for DeepSeek Harness: cut one note out of a whale recording, transpose it across the keyboard, render a tune and play it locally.",
+  "type": "module",
+  "main": "./index.js",
+  "exports": {
+    ".": "./index.js",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "index.js",
+    "whale_song.py",
+    "cordis.patch.yml",
+    "samples/commons-humpback.oga",
+    "README.md",
+    "AUTHOR.md",
+    "CREDITS.md",
+    "CHANGELOG.md",
+    "LICENSE",
+    "icon.svg"
+  ],
+  "keywords": [
+    "dsh",
+    "dsh-plugin",
+    "deepseek-harness",
+    "whale",
+    "instrument",
+    "sampler",
+    "audio"
+  ],
+  "author": "凌滅風",
+  "license": "MIT",
+  "engines": {
+    "node": ">=20"
+  },
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    }
+  },
+  "meta": {
+    "title": "鲸歌",
+    "description": "用鲸的呼叫做成的乐器：一个音一个采样，按音阶移调，本机渲染并播放。"
+  },
+  "icon": "./icon.svg"
+}
