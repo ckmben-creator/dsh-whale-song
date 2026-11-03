@@ -1,6 +1,6 @@
 {
   "name": "dsh-whale-song",
-  "version": "0.1.0",
+  "version": "0.2.3",
   "description": "Whale-song instrument for DeepSeek Harness: cut one note out of a whale recording, transpose it across the keyboard, render a tune and play it locally.",
   "type": "module",
   "main": "./index.js",
@@ -18,7 +18,10 @@
     "CREDITS.md",
     "CHANGELOG.md",
     "LICENSE",
-    "icon.svg"
+    "icon.svg",
+    "whale_pipeline.py",
+    "midi_to_notes.py",
+    "genshin_score.py"
   ],
   "keywords": [
     "dsh",

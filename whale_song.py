@@ -396,7 +396,7 @@ def onepole_lp(x: np.ndarray, sr: int, cutoff: float, taps: int = 31) -> np.ndar
 
 def whale_play(inst: np.ndarray, sr: int, midi: int, ref_midi: int = 60,
                bend_cents: float = 55.0, dur: float | None = None,
-               attack_ms: float = 55.0, velocity: float = 0.85) -> np.ndarray:
+               attack_ms: float = 90.0, velocity: float = 0.85) -> np.ndarray:
     """一个音，但**音高在音内滑动**——这是鲸和钢琴最大的差别。
 
     钢琴：音高固定 + 敲击式起音。
@@ -404,7 +404,8 @@ def whale_play(inst: np.ndarray, sr: int, midi: int, ref_midi: int = 60,
 
     于是这里做了三件事：
       1. 音内音高曲线（拱形：先升后降），用变速读采样实现；
-      2. 起音放到 55ms，去掉敲击感，但还留得住节奏；
+      2. 起音缓慢上升（attack_ms，默认 90ms），去掉敲击感，但还留得住节奏；
+         55ms 时主人评「像力度重的弹弦类乐器」——拨弦感就来自这里太短；
       3. 尾巴留长一点，交给混响。
     """
     base = 2.0 ** ((midi - ref_midi) / 12.0)
@@ -591,7 +592,7 @@ def parse_notes(spec: str) -> tuple[list[tuple[int | None, float]], list[tuple[i
     - 竖线 `|` 和逗号都当分隔符，只是给人看的
     - 低音层自动生成：每个小节（4 拍）取第一个有声的音，向下一个八度
     """
-    tokens = [t for t in spec.replace(',', ' ').replace('|', ' ').split() if t]
+    tokens = [t for t in spec.replace(',', ' ').replace('|', ' ').replace('/', ' ').split() if t]
     if not tokens:
         raise ValueError('旋律是空的')
 
@@ -628,6 +629,7 @@ def render_demo(out_path: str, bpm: float = 66.0, seed: int = 7,
                 high_raw: np.ndarray | None = None,
                 low_f0: float = 0.0, high_f0: float = 0.0,
                 bend: float = 55.0, lp_hz: float = 3200.0, tail_s: float = 2.6,
+                attack_ms: float = 90.0,
                 notes: str | None = None) -> str:
     sr = SR
     beat = 60.0 / bpm
@@ -670,12 +672,13 @@ def render_demo(out_path: str, bpm: float = 66.0, seed: int = 7,
         vel = 0.76 + 0.06 * math.sin(math.pi * sounding / max(1, n_notes - 1))
         if n_notes - sounding <= 3:
             vel = max(vel, 0.82)          # 收句别掉下去，不然整段像没唱完
-        lead = whale_play(inst, sr, midi, ref_midi=60, bend_cents=bend, dur=note_len, velocity=vel)
+        lead = whale_play(inst, sr, midi, ref_midi=60, bend_cents=bend, dur=note_len,
+                          attack_ms=attack_ms, velocity=vel)
         if lp_hz > 0:
             lead = onepole_lp(lead, sr, lp_hz)
         # 低八度一层：鲸的「体」在低频，单靠高音区只会像口哨/钢琴
         sub = whale_play(inst, sr, midi - 12, ref_midi=60, bend_cents=bend * 0.6,
-                         dur=note_len * 1.2, velocity=vel * 0.55)
+                         dur=note_len * 1.2, attack_ms=attack_ms, velocity=vel * 0.55)
         i0 = int(t * sr)
         for buf in (lead, sub):
             end = min(len(mix), i0 + len(buf))
@@ -722,6 +725,8 @@ def main() -> None:
     ap.add_argument("--bend", type=float, default=55.0, help="音内滑音幅度（音分）；0 = 不用滑音，回到钢琴式直音")
     ap.add_argument("--lp", type=float, default=3200.0, help="低通截止频率 Hz；0 = 不低通")
     ap.add_argument("--tail", type=float, default=2.6, help="结尾留多少秒纯混响；鲸的长尾音就用 4–6")
+    ap.add_argument("--attack", type=float, default=90.0,
+                    help="起音上升时间 ms；55 = 像拨弦，90–110 = 更接近鲸的软起音")
     ap.add_argument("--notes", help="自定义旋律，例如 'C4:1 E4:1 G4:2 | r:1 A4:2'；不填用内置摇篮曲")
     args = ap.parse_args()
 
@@ -748,7 +753,7 @@ def main() -> None:
                        low_raw=low_raw, high_raw=high_raw,
                        low_f0=args.f0_low, high_f0=args.f0_high,
                        bend=args.bend, lp_hz=args.lp, tail_s=args.tail,
-                       notes=args.notes)
+                       attack_ms=args.attack, notes=args.notes)
     size = os.path.getsize(path)
     with wave.open(path, "rb") as fh:
         dur = fh.getnframes() / fh.getframerate()
